@@ -1,0 +1,49 @@
+version: "3.8"
+services:
+  zookeeper:
+    image: apache/pulsar:3.0.0
+    container_name: pulsar-zk
+    command: "bin/pulsar zookeeper"
+    ports:
+      - "2181:2181"
+    networks:
+      - pulsar-net
+
+  pulsar:
+    image: apache/pulsar:3.0.0
+    container_name: pulsar
+    depends_on:
+      - zookeeper
+    command: "bin/pulsar standalone"
+    ports:
+      - "6650:6650"   # Pulsar binary
+      - "8080:8080"   # Pulsar HTTP
+    networks:
+      - pulsar-net
+
+  producer:
+    build: ./producer
+    container_name: kraken-producer
+    environment:
+      PULSAR_SERVICE_URL: pulsar://pulsar:6650
+      PULSAR_TOPIC: kraken-trades
+    depends_on:
+      - pulsar
+    networks:
+      - pulsar-net
+
+  consumer:
+    build: ./consumer
+    container_name: kraken-consumer
+    environment:
+      PULSAR_SERVICE_URL: pulsar://pulsar:6650
+      PULSAR_TOPIC: kraken-trades
+      PULSAR_SUBSCRIPTION: kraken-sub
+    depends_on:
+      - pulsar
+    networks:
+      - pulsar-net
+
+networks:
+  pulsar-net:
+    driver: bridge

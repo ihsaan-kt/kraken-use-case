@@ -1,0 +1,7 @@
+# Core
+confluent-kafka==2.3.0
+python-dotenv==1.0.0
+pulsar-client
+
+# Optional for analytics (uncomment if needed)
+# pandas==2.0.3  # For data transformations
